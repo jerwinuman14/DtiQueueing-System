@@ -115,7 +115,7 @@ html, body {
 
     <!-- VIDEO + DATE/TIME -->
     <div id="videoPanel">
-        <video id="videoPlayer" autoplay loop muted>
+        <video id="videoPlayer" autoplay loop unmuted>
             <source src="{{ asset('storage/videos/VIDEOFORQUEUING.mp4') }}" type="video/mp4">
         </video>
         <button id="btnFullscreen">⛶</button>

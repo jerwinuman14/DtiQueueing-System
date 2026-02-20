@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Counter Dashboard</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <style>
@@ -15,20 +16,23 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             padding: 10px;
         }
 
         /* ====== Card Container ====== */
         .card {
             width: 100%;
-            max-width: 380px;
+            max-width: 400px;
             background: #1e1e1e;
             border-radius: 20px;
             padding: 20px;
             text-align: center;
             box-shadow: 0 8px 25px rgba(0,0,0,0.6);
             color: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         /* ====== Title ====== */
@@ -36,44 +40,42 @@
             font-size: 16px;
             font-weight: 600;
             color: #ffd700;
-            margin-bottom: 15px;
         }
 
         h1 {
             font-size: 22px;
             font-weight: 700;
-            margin-bottom: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             flex-wrap: wrap;
+            gap: 5px;
         }
 
         .username {
             font-size: 18px;
             font-weight: 500;
             color: #00e676;
-            margin-left: 8px;
         }
 
         /* ====== Buttons ====== */
         .buttons {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
         .buttons button {
             flex: 1 1 45%;
-            padding: 10px;
+            padding: 12px;
             font-size: 16px;
             font-weight: 600;
             border: none;
             border-radius: 12px;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
+            min-width: 120px;
         }
 
         .buttons button:hover {
@@ -88,7 +90,6 @@
         .stats {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
             gap: 10px;
             flex-wrap: wrap;
         }
@@ -99,6 +100,7 @@
             padding: 15px 10px;
             border-radius: 10px;
             text-align: center;
+            min-width: 80px;
         }
 
         .stat-box h3 {
@@ -121,7 +123,7 @@
 
         .logout button {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             font-size: 14px;
             border: none;
             border-radius: 10px;
@@ -136,11 +138,19 @@
         }
 
         /* ====== Responsive ====== */
-        @media(max-width: 400px) {
+        @media(max-width: 450px) {
             h1 { font-size: 20px; }
             .username { font-size: 16px; }
             .stat-box h2 { font-size: 20px; }
-            .buttons button { font-size: 14px; padding: 8px; }
+            .buttons button { font-size: 14px; padding: 10px; }
+            .stat-box { flex: 1 1 45%; margin-bottom: 8px; }
+        }
+
+        @media(max-width: 350px) {
+            h1 { font-size: 18px; }
+            .username { font-size: 14px; }
+            .stat-box h2 { font-size: 18px; }
+            .buttons button { font-size: 13px; padding: 8px; }
         }
     </style>
 </head>

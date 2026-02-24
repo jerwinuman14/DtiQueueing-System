@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Display Screen - Google')
+@section('title', 'Display Screen')
 
 @php
     $hideSidebar = true;
@@ -21,8 +21,8 @@ html, body {
 
 #displayScreenContainer {
     display: flex;
-    height: 100%;
-    width: 100%;
+    height: 100vh;
+    width: 100vw;
     gap: 1rem;
     padding: 0.5rem;
     box-sizing: border-box;
@@ -51,7 +51,6 @@ html, body {
     color: #1e40af;
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
-    font-family: sans-serif;
 }
 
 #countersPanel {
@@ -60,22 +59,12 @@ html, body {
     flex-direction: column;
     align-items: flex-end;
     gap: 1rem;
-    padding-top: 0.5rem;
-    width: 100%;
-}
-
-#nowServingWrapper {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
 }
 
 #txtTopNowServing {
     font-size: 2.5rem;
     color: white;
     font-weight: bold;
-    margin: 0;
-    text-align: right;
 }
 
 .counterBox {
@@ -86,7 +75,6 @@ html, body {
     padding: 1rem 2rem;
     border-radius: 0.75rem;
     width: 100%;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
 .counterLabel {
@@ -99,42 +87,35 @@ html, body {
     font-size: 2rem;
     font-weight: bold;
 }
-
-#btnFullscreen {
-    position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
-    font-size: 2rem;
-    color: white;
-    cursor: pointer;
-    z-index: 50;
-}
 </style>
 
 <div id="displayScreenContainer">
 
-    <!-- VIDEO + DATE/TIME -->
+    <!-- VIDEO PANEL -->
     <div id="videoPanel">
-        <video id="videoPlayer" autoplay loop unmuted>
+
+        <!-- FIXED VIDEO (autoplay + muted required for browsers) -->
+        <video id="videoPlayer" autoplay muted loop playsinline>
             <source src="{{ asset('storage/videos/VIDEOFORQUEUING.mp4') }}" type="video/mp4">
         </video>
-        <button id="btnFullscreen">⛶</button>
 
+        <!-- DATE / TIME -->
         <div id="dateTimePanel">
-            <img src="{{ asset('storage/images/logoDTI.png') }}" class="h-24 object-contain">
-            <div class="text-center">
-                <div id="txtClock" class="text-5xl font-bold"></div>
-                <div id="txtDate" class="text-2xl mt-1"></div>
+            <img src="{{ asset('storage/images/logoDTI.png') }}" style="height:80px;">
+
+            <div style="text-align:center;">
+                <div id="txtClock" style="font-size:40px;font-weight:bold;"></div>
+                <div id="txtDate" style="font-size:20px;"></div>
             </div>
-            <img src="{{ asset('storage/images/bagongpilipinas2.png') }}" class="h-24 object-contain">
+
+            <img src="{{ asset('storage/images/bagongpilipinas2.png') }}" style="height:80px;">
         </div>
+
     </div>
 
     <!-- COUNTERS -->
     <div id="countersPanel">
-        <div id="nowServingWrapper">
-            <h1 id="txtTopNowServing">NOW SERVING</h1>
-        </div>
+        <h1 id="txtTopNowServing">NOW SERVING</h1>
 
         @foreach($selectedCounters as $i)
         <div class="counterBox">
@@ -143,19 +124,24 @@ html, body {
         </div>
         @endforeach
     </div>
+
 </div>
 
-<!-- AUDIO FOR NEXT TICKET -->
+<!-- AUDIO -->
 <audio id="nextSound" preload="auto">
     <source src="{{ asset('storage/audios/doorbell-223669.mp3') }}" type="audio/mpeg">
 </audio>
+
 @endsection
+
 
 @section('scripts')
 <script>
+
 // CLOCK
 function updateClock() {
     const now = new Date();
+
     const hours = now.getHours() % 12 || 12;
     const minutes = now.getMinutes().toString().padStart(2,'0');
     const seconds = now.getSeconds().toString().padStart(2,'0');
@@ -172,70 +158,53 @@ function updateClock() {
             year: 'numeric'
         });
 }
+
 setInterval(updateClock, 1000);
 updateClock();
 
-// FULLSCREEN
-document.getElementById('btnFullscreen').addEventListener('click', () => {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
-    } else {
-        document.exitFullscreen();
-    }
-});
 
-// 🔊 NEXT SOUND
+// AUDIO FIX
 const nextSound = document.getElementById('nextSound');
-nextSound.load(); // preload sound
 
 function playNextSound() {
     nextSound.currentTime = 0;
-    nextSound.play().catch(e => console.log("Audio blocked:", e));
+    nextSound.play().catch(() => {});
 }
 
-// FETCH COUNTERS AND DISPLAY IN NUMERIC ORDER
+
+// FETCH COUNTERS
 function fetchCounters() {
+
     fetch("{{ route('admin.getCounters') }}")
         .then(res => res.json())
         .then(data => {
+
             @foreach($selectedCounters as $i)
-            const el{{ $i }} = document.getElementById('txtServingNumber{{ $i }}');
+            let el{{ $i }} = document.getElementById('txtServingNumber{{ $i }}');
+
             if (el{{ $i }}) {
-                let newTicket = 'C000'; // default if no ticket
-                if (data[{{ $i }}] && data[{{ $i }}].ticket != null) {
-                    const ticketNum = parseInt(data[{{ $i }}].ticket, 10);
+
+                let newTicket = 'C000';
+
+                if (data[{{ $i }}] && data[{{ $i }}].ticket) {
+
+                    let ticketNum = parseInt(data[{{ $i }}].ticket);
+
                     if (!isNaN(ticketNum)) {
                         newTicket = 'C' + ticketNum.toString().padStart(3,'0');
                     }
                 }
+
                 el{{ $i }}.textContent = newTicket;
             }
             @endforeach
+
         })
-        .catch(err => console.error('Error fetching counters:', err));
+        .catch(err => console.log(err));
 }
+
 setInterval(fetchCounters, 2000);
 fetchCounters();
 
-// SERVE NEXT TICKET
-function nextTicket() {
-    axios.post("{{ route('counter.serveTicket') }}")
-        .then(() => {
-            fetchCounters();      // update display immediately
-            playNextSound();      // 🔊 play only on NEXT click
-        })
-        .catch(error => {
-            alert(error.response?.data?.message ?? 'No waiting tickets or already serving.');
-        });
-}
-
-// COMPLETE CURRENT TICKET
-function completeTicket() {
-    axios.post("{{ route('counter.completeTicket') }}")
-        .then(() => fetchCounters())
-        .catch(error => {
-            alert(error.response?.data?.message ?? 'No ticket currently serving.');
-        });
-}
 </script>
 @endsection
